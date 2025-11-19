@@ -57,7 +57,7 @@ Several bad actors have been discovered attempting to log into the target machin
 
 <img width="674" height="141" alt="3" src="https://github.com/user-attachments/assets/9942cef5-7f7d-4a14-8943-26dde1a1a763" />
 
-- <Query no results>
+- Query no results 
 
 The only successful remote/network logons in the last 30 days was for the ‘Seanji’ account (57 total)
 
