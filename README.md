@@ -38,51 +38,17 @@ Notes / Findings:
 Sample Queries (spoilers, highlight or copy/paste to reveal):
 
 
-// Check most failed logons
-DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonFailed"
-| where isnotempty(RemoteIP)
-| summarize Attempts = count() by ActionType, RemoteIP, DeviceName
-| order by Attempts
+Seanji-mde-test has been internet facing for several days
 
-
-// Take the top 10 IPs with the most logon failures and see if any succeeded to logon
-let RemoteIPsInQuestion = dynamic(["119.42.115.235","183.81.169.238", "74.39.190.50", "121.30.214.172", "83.222.191.62", "45.41.204.12", "192.109.240.116"]);
-DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonSuccess"
-| where RemoteIP has_any(RemoteIPsInQuestion)
-
-
-// Look for any remote IP addresses who have had both successful and failed logons
-// Investigate for potential brute force successes
-let FailedLogons = DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonFailed"
-| where isnotempty(RemoteIP)
-| summarize FailedLogonAttempts = count() by ActionType, RemoteIP, DeviceName
-| order by FailedLogonAttempts;
-let SuccessfulLogons =  DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonSuccess"
-| where isnotempty(RemoteIP)
-| summarize SuccessfulLogons = count() by ActionType, RemoteIP, DeviceName, AccountName
-| order by SuccessfulLogons;
-FailedLogons
-| join SuccessfulLogons on RemoteIP
-| project RemoteIP, DeviceName, FailedLogonAttempts, SuccessfulLogons, AccountName
-
-Timeline Summary and Findings:
-
-Seanji-mde-test has been internet facing for several days:
 DeviceInfo
 | where DeviceName == "seanji-mde-test"
 | where IsInternetFacing == true
 | order by Timestamp desc
-- Last internet facing time: 2025-11-18 T21:44:03
 
-Several bad actors have been discovered attempting to log into the target machine: 
+- Last internet facting time: 2025-11-18 T21:44:03
+
+Several bad actors have been discovered attempting to log into the target machine.
+
 DeviceLogonEvents
 | where DeviceName == "seanji-mde-test"
 | where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
@@ -91,26 +57,34 @@ DeviceLogonEvents
 | summarize Attempts = count() by ActionType, RemoteIP, DeviceName
 | order by Attempts
 
-This image shows the most login attempts from an internet facing IP address in descending order.
-The top 5 most loginfailed attempt IP addresses have not been able to successfully break into the VM 
-// Take the top 10 IPs with the most logon failures and see if any succeeded to logon
+<img width="675" height="311" alt="logon_failed" src="https://github.com/user-attachments/assets/ecec0a12-5528-4af6-b8b8-2c6f2ad9695b" />
+
+- This image shows the most login attempts from an internet facing IP address in descending order.
+
+  The top 5 most loginfailed attempt IP addresses have not been able to successfully break into the VM
+
+  // Take the top 10 IPs with the most logon failures and see if any succeeded to logon
 let RemoteIPsInQuestion = dynamic(["80.66.88.30","80.94.95.75", "87.251.64.49", "10.0.8.5", "174.237.27.120", "185.39.19.242", "2.57.121.22"]);
 DeviceLogonEvents
 | where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
 | where ActionType == "LogonSuccess"
 | where RemoteIP has_any(RemoteIPsInQuestion)
-<Query no results>
 
+- <Query no results>
 
 The only successful remote/network logons in the last 30 days was for the ‘Seanji’ account (57 total)
+
 DeviceLogonEvents
 | where DeviceName == "seanji-mde-test"
 | where LogonType == "Network"
 | where ActionType == "LogonFailed"
 | where AccountName == "seanji"
 | summarize count()
-There were 0 failed logons for the ‘Seanji’ account, indicating that a brute force attempt for this account didn’t take place, and a 1-time password guess is unlikely 
+
+- There were 0 failed logons for the ‘Seanji’ account, indicating that a brute force attempt for this account didn’t take place, and a 1-time password guess is unlikely
+
 We checked all of the successful login IP addresses for the ‘seanji’ account to see if any of them were unusual or from an unexpected location. All were normal. 
+
 DeviceLogonEvents
 | where DeviceName == "seanji-mde-test"
 | where LogonType == "Network"
@@ -118,9 +92,12 @@ DeviceLogonEvents
 | where AccountName == "seanji"
 | summarize LoginCount = count() by DeviceName, ActionType, AccountName, RemoteIP
 
+<img width="843" height="149" alt="logon_success" src="https://github.com/user-attachments/assets/56955041-1db1-4837-b6ba-8a05fd93254c" />
 
-Though the device was exposed to the internet and clear brute force attempts have taken place, there is no evidence of any brute force success or unauthorized access by from the legitimate account ‘seanji’
-—------------------
+- Though the device was exposed to the internet and clear brute force attempts have taken place, there is no evidence of any brute force success or unauthorized access by from the legitimate account ‘seanji’
+
+----------------------------------------------------------------------------
+
 Relevant MITRE ATT&CK TTPs
 - **Discovery → Remote Services (T1021)**  
   Attackers attempting authentication over exposed remote services (RDP).
@@ -139,12 +116,17 @@ Relevant MITRE ATT&CK TTPs
 
 - **Initial Access → Valid Accounts (T1078)**  
   Verified successful logons only by legitimate user “Seanji”; no unauthorized use detected.
-—------------------
+
+----------------------------------------------------------------------------
+
 Response Actions
-Hardened the NSG attached to seanji-mde-test to allow only RDP traffic from specific endpoints (no public internet access)
-Implemented account lockout policy 
-Implemented MFA
-—------------------
+- Hardened the NSG attached to seanji-mde-test to allow only RDP traffic from specific endpoints (no public internet access)
+- Implemented account lockout policy 
+- Implemented MFA
+
+----------------------------------------------------------------------------
+
 Places to Improve
-Become more efficient with queries and note taking 
+- Become more efficient with queries and note taking 
+
 
