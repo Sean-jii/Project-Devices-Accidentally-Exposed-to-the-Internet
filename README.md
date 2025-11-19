@@ -40,22 +40,14 @@ Sample Queries (spoilers, highlight or copy/paste to reveal):
 
 Seanji-mde-test has been internet facing for several days
 
-DeviceInfo
-| where DeviceName == "seanji-mde-test"
-| where IsInternetFacing == true
-| order by Timestamp desc
+<img width="660" height="95" alt="1" src="https://github.com/user-attachments/assets/4eb0e109-6411-47d7-a801-58eb09f54172" />
+
 
 - Last internet facting time: 2025-11-18 T21:44:03
 
 Several bad actors have been discovered attempting to log into the target machine.
 
-DeviceLogonEvents
-| where DeviceName == "seanji-mde-test"
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonFailed"
-| where isnotempty(RemoteIP)
-| summarize Attempts = count() by ActionType, RemoteIP, DeviceName
-| order by Attempts
+<img width="643" height="102" alt="2" src="https://github.com/user-attachments/assets/139c464c-f387-42b2-813a-da2fd45c8a3f" />
 
 <img width="675" height="311" alt="logon_failed" src="https://github.com/user-attachments/assets/ecec0a12-5528-4af6-b8b8-2c6f2ad9695b" />
 
@@ -63,34 +55,19 @@ DeviceLogonEvents
 
   The top 5 most loginfailed attempt IP addresses have not been able to successfully break into the VM
 
-  // Take the top 10 IPs with the most logon failures and see if any succeeded to logon
-let RemoteIPsInQuestion = dynamic(["80.66.88.30","80.94.95.75", "87.251.64.49", "10.0.8.5", "174.237.27.120", "185.39.19.242", "2.57.121.22"]);
-DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonSuccess"
-| where RemoteIP has_any(RemoteIPsInQuestion)
+<img width="674" height="141" alt="3" src="https://github.com/user-attachments/assets/9942cef5-7f7d-4a14-8943-26dde1a1a763" />
 
 - <Query no results>
 
 The only successful remote/network logons in the last 30 days was for the ‘Seanji’ account (57 total)
 
-DeviceLogonEvents
-| where DeviceName == "seanji-mde-test"
-| where LogonType == "Network"
-| where ActionType == "LogonFailed"
-| where AccountName == "seanji"
-| summarize count()
+<img width="691" height="123" alt="4" src="https://github.com/user-attachments/assets/317b1483-9d27-4e7e-a5f0-831c861c8ea4" />
 
 - There were 0 failed logons for the ‘Seanji’ account, indicating that a brute force attempt for this account didn’t take place, and a 1-time password guess is unlikely
 
 We checked all of the successful login IP addresses for the ‘seanji’ account to see if any of them were unusual or from an unexpected location. All were normal. 
 
-DeviceLogonEvents
-| where DeviceName == "seanji-mde-test"
-| where LogonType == "Network"
-| where ActionType == "LogonSuccess"
-| where AccountName == "seanji"
-| summarize LoginCount = count() by DeviceName, ActionType, AccountName, RemoteIP
+<img width="684" height="119" alt="5" src="https://github.com/user-attachments/assets/072c14f4-5590-4367-a57f-8227a86adb26" />
 
 <img width="843" height="149" alt="logon_success" src="https://github.com/user-attachments/assets/56955041-1db1-4837-b6ba-8a05fd93254c" />
 
