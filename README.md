@@ -72,14 +72,17 @@ let SuccessfulLogons =  DeviceLogonEvents
 FailedLogons
 | join SuccessfulLogons on RemoteIP
 | project RemoteIP, DeviceName, FailedLogonAttempts, SuccessfulLogons, AccountName
+
 Timeline Summary and Findings:
-Seanji-mde-test has been internet facing for several days
+
+Seanji-mde-test has been internet facing for several days:
 DeviceInfo
 | where DeviceName == "seanji-mde-test"
 | where IsInternetFacing == true
 | order by Timestamp desc
-Last internet facing time: 2025-11-18 T21:44:03
-Several bad actors have been discovered attempting to log into the target machine. 
+- Last internet facing time: 2025-11-18 T21:44:03
+
+Several bad actors have been discovered attempting to log into the target machine: 
 DeviceLogonEvents
 | where DeviceName == "seanji-mde-test"
 | where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
